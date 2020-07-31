@@ -1,4 +1,5 @@
 const { settings } = require("../models");
+const utils = require("../utils");
 
 //The following two functions should have token validation
 const getSettings = (req, res, next) => {
@@ -22,9 +23,29 @@ const login = (req, res, next) => {
   settings.login(req.body, (message) => res.json(message));
 };
 
+const googleCall = (req, res, next) => {
+  settings.googleCall(
+    utils.google,
+    utils.oauth2Client,
+    utils.SCOPES,
+    (authorizeUrl) => res.redirect(authorizeUrl)
+  );
+};
+
+const googleCallBack = (req, res, next) => {
+  settings.googleCallBack(
+    req.url,
+    utils.oauth2Client,
+    utils.google,
+    (redirect) => res.redirect(redirect)
+  );
+};
+
 module.exports = {
   getSettings,
   setSettings,
   register,
   login,
+  googleCall,
+  googleCallBack,
 };

@@ -14,6 +14,7 @@ import "./styles.css";
 import moment from "moment";
 import user from "../user/user";
 import { getSettings, setSettings } from "../utils";
+import config from "../utils/config";
 
 export default class Settings extends React.Component {
   constructor(props) {
@@ -40,6 +41,8 @@ export default class Settings extends React.Component {
       },
       email: "",
       loading_link: false,
+      loading_set: false,
+      google: false,
     };
     this.onChange = this.onChange.bind(this);
     this.onChangeTimeMon = this.onChangeTimeMon.bind(this);
@@ -115,15 +118,15 @@ export default class Settings extends React.Component {
 
   async handleFinish() {
     try {
-      let r = await setSettings(user.getEmail());
+      this.setState({ loading_set: true });
+      var obj = this.state.availability;
+      obj["email"] = user.getEmail();
+      let r = await setSettings(obj);
+      this.setState({ loading_set: false });
       if (r.message === "Success") this.success();
     } catch (error) {
       console.log(error);
     }
-  }
-
-  async handleLink() {
-    let r = await fetch("http://localhost:8888/google");
   }
 
   async getSettings() {
@@ -134,6 +137,7 @@ export default class Settings extends React.Component {
       var dis = this.state.disabled;
       var av = this.state.availability;
       this.setState({ email: d.email });
+      if (d.google) this.setState({ google: true });
       for (var i = 0; i < month.length; i++) {
         if (d[month[i]][0] != 0) {
           dis[month[i]] = false;
@@ -392,7 +396,11 @@ export default class Settings extends React.Component {
         <Row className="row">
           <Col className="day" span={4}></Col>
           <Col className="times" span={12}>
-            <Button type="primary" onClick={this.handleFinish}>
+            <Button
+              type="primary"
+              onClick={this.handleFinish}
+              loading={this.state.loading_set}
+            >
               Save
             </Button>
           </Col>
@@ -406,17 +414,18 @@ export default class Settings extends React.Component {
           <Col className="day" span={4}></Col>
           <Col className="times" span={12}>
             <a
-              href="http://localhost:8888/google"
-              disabled={this.state.email != "" ? true : false}
+              href={config.domains.api + "/google"}
+              disabled={this.state.google ? true : false}
             >
               <Button
                 type="primary"
-                disabled={this.state.email != "" ? true : false}
+                disabled={this.state.google ? true : false}
+                onClick={this.handleLink}
               >
                 Link
               </Button>
             </a>
-            <label>{this.state.email == "" ? "" : this.state.email}</label>
+            <label>{this.state.google ? this.state.email : ""}</label>
           </Col>
         </Row>
         <Row className="row">
@@ -424,7 +433,7 @@ export default class Settings extends React.Component {
           <Col className="times" span={12}>
             <Button
               type="primary"
-              disabled={this.state.email != "" ? false : true}
+              disabled={this.state.google ? false : true}
               onClick={this.handleLogout}
             >
               Unlink email

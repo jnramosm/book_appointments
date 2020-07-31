@@ -11,6 +11,10 @@ const routes = (app) => {
   app.post("/register", settings.register);
 
   app.post("/login", settings.login);
+
+  app.get("/google", settings.googleCall);
+
+  app.get("/google/callback", settings.googleCallBack);
 };
 
 module.exports = {

@@ -15,4 +15,5 @@ const oauth2Client = new google.auth.OAuth2(
 module.exports = {
   SCOPES,
   oauth2Client,
+  google,
 };

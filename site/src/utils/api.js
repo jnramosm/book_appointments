@@ -12,8 +12,8 @@ export const getSettings = async (email) => {
   return await requestApi("getsettings", "POST", { email });
 };
 
-export const setSettings = async (email) => {
-  return await requestApi("setsettings", "POST", { email });
+export const setSettings = async (obj) => {
+  return await requestApi("setsettings", "POST", obj);
 };
 
 const requestApi = async (
