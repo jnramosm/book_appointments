@@ -17,7 +17,7 @@ export const setSettings = async (obj) => {
 };
 
 export const removeSession = async (email) => {
-  return await requestApi("/google/remove", "GET", { email });
+  return await requestApi("/google/remove", "POST", { email });
 };
 
 const requestApi = async (

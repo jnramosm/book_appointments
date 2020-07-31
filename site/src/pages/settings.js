@@ -435,6 +435,7 @@ export default class Settings extends React.Component {
               type="primary"
               disabled={this.state.google ? false : true}
               onClick={this.handleLogout}
+              loading={this.state.loading_link}
             >
               Unlink email
             </Button>

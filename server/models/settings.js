@@ -129,6 +129,7 @@ const googleCallBack = async (reqUrl, client, google, cb) => {
 };
 
 const googleRemove = async (email, cb) => {
+  // console.log(email);
   connection((db) => {
     db.collection("users").updateOne(
       { email: email },

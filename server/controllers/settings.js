@@ -42,7 +42,7 @@ const googleCallBack = (req, res, next) => {
 };
 
 const googleRemove = (req, res, next) => {
-  settings.googleRemove(req.email, (message) => res.json({ message }));
+  settings.googleRemove(req.body.email, (message) => res.json({ message }));
 };
 
 module.exports = {
