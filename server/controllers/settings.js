@@ -41,6 +41,10 @@ const googleCallBack = (req, res, next) => {
   );
 };
 
+const googleRemove = (req, res, next) => {
+  settings.googleRemove(req.email, (message) => res.json({ message }));
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -48,4 +52,5 @@ module.exports = {
   login,
   googleCall,
   googleCallBack,
+  googleRemove,
 };

@@ -15,6 +15,7 @@ const getSettings = (user = {}, cb) => {
       obj["sun"] = userDb.sun;
       obj["sess"] = userDb.sess;
       obj["email"] = userDb.email;
+      obj["google"] = userDb.google;
       cb(obj);
     });
   });
@@ -127,6 +128,25 @@ const googleCallBack = async (reqUrl, client, google, cb) => {
   });
 };
 
+const googleRemove = async (email, cb) => {
+  connection((db) => {
+    db.collection("users").updateOne(
+      { email: email },
+      {
+        $set: {
+          google: false,
+          access_token: "",
+          refresh_token: "",
+        },
+      },
+      (err, data) => {
+        if (err) cb("Error from DB");
+        cb("Success");
+      }
+    );
+  });
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -134,4 +154,5 @@ module.exports = {
   login,
   googleCall,
   googleCallBack,
+  googleRemove,
 };

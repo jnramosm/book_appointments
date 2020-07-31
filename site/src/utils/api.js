@@ -9,11 +9,15 @@ export const login = async (email) => {
 };
 
 export const getSettings = async (email) => {
-  return await requestApi("getsettings", "POST", { email });
+  return await requestApi("/getsettings", "POST", { email });
 };
 
 export const setSettings = async (obj) => {
   return await requestApi("setsettings", "POST", obj);
+};
+
+export const removeSession = async (email) => {
+  return await requestApi("/google/remove", "GET", { email });
 };
 
 const requestApi = async (

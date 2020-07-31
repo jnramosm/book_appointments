@@ -1,7 +1,7 @@
 class User {
   constructor() {
-    this.authenticated = false;
-    this.email = "test1@test.com";
+    this.authenticated = true;
+    this.email = "jnramos@uc.cl";
   }
 
   setAuthentication(state) {

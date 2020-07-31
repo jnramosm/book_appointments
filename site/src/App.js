@@ -19,7 +19,7 @@ function App() {
     <Router>
       <CustomLayout>
         <Switch>
-          <Route exact path="/" component={Settings} />
+          <PrivateRoute exact path="/" component={Settings} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <Route path="/appointments" component={Appointments} />

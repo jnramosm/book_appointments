@@ -13,7 +13,7 @@ import {
 import "./styles.css";
 import moment from "moment";
 import user from "../user/user";
-import { getSettings, setSettings } from "../utils";
+import { getSettings, setSettings, removeSession } from "../utils";
 import config from "../utils/config";
 
 export default class Settings extends React.Component {
@@ -91,8 +91,8 @@ export default class Settings extends React.Component {
 
   success() {
     Modal.success({
-      title: "Datos actualizados",
-      content: "La disponibilidad fue actualizada con éxito!",
+      title: "Success!",
+      content: "Your data was updated successfuly!",
       onOk() {},
     });
   }
@@ -137,6 +137,7 @@ export default class Settings extends React.Component {
       var dis = this.state.disabled;
       var av = this.state.availability;
       this.setState({ email: d.email });
+      // console.log(d);
       if (d.google) this.setState({ google: true });
       for (var i = 0; i < month.length; i++) {
         if (d[month[i]][0] != 0) {
@@ -158,9 +159,8 @@ export default class Settings extends React.Component {
   async handleLogout() {
     this.setState({ loading_link: true });
     try {
-      let r = await fetch("http://localhost:8888/api/removesession");
-      let d = await r.json();
-      if (d.result === "done") {
+      let d = await removeSession(this.state.email);
+      if (d.message === "Success") {
         this.getSettings();
         this.setState({ loading_link: false });
       }
