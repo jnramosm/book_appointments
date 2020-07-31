@@ -20,6 +20,10 @@ export const removeSession = async (email) => {
   return await requestApi("/google/remove", "POST", { email });
 };
 
+export const slots = async (obj) => {
+  return await requestApi("/slots", "POST", obj);
+};
+
 const requestApi = async (
   path = "",
   method = "GET",

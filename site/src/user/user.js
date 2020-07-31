@@ -1,7 +1,9 @@
+import { email } from "../private/email";
+
 class User {
   constructor() {
     this.authenticated = true;
-    this.email = "jnramos@uc.cl";
+    this.email = email;
   }
 
   setAuthentication(state) {

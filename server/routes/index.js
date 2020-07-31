@@ -17,6 +17,8 @@ const routes = (app) => {
   app.get("/google/callback", settings.googleCallBack);
 
   app.post("/google/remove", settings.googleRemove);
+
+  app.post("/slots", settings.slots);
 };
 
 module.exports = {

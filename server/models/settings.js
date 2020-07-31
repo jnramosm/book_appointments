@@ -148,6 +148,138 @@ const googleRemove = async (email, cb) => {
   });
 };
 
+const slots = async (data = {}, client, google, cb) => {
+  connection((db) => {
+    //Refresh refresh token if necessary
+    client.on("tokens", (tokens) => {
+      if (tokens.refresh_token) {
+        db.collection("users").updateOne(
+          { email: data.email },
+          {
+            $set: {
+              refresh_token: tokens.refresh_token,
+            },
+          },
+          {
+            upsert: true,
+          },
+          (err, docs) => {
+            if (err) console.log(err);
+          }
+        );
+      }
+    });
+
+    var date = new Date(data.day);
+    var day = date.getDay();
+    const dayOfWeek = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    db.collection("users")
+      .find({ email: data.email })
+      .toArray()
+      .then(async (docs) => {
+        var slots = [];
+        if (docs[0][dayOfWeek[day]][0] == docs[0][dayOfWeek[day]][1]) cb(slots);
+        else {
+          var sess_dur =
+            parseInt(docs[0].sess.split(":")[0]) +
+            parseInt(docs[0].sess.split(":")[1]) / 60;
+          var since = new Date(data.day);
+          var today = new Date();
+          since.setHours(parseInt(docs[0][dayOfWeek[day]][0].split(":")[0]));
+          since.setHours(parseInt(docs[0][dayOfWeek[day]][0].split(":")[0]));
+          since.setMinutes(parseInt(docs[0][dayOfWeek[day]][0].split(":")[1]));
+          var to = new Date(data.day);
+          to.setHours(parseInt(docs[0][dayOfWeek[day]][1].split(":")[0]));
+          to.setMinutes(parseInt(docs[0][dayOfWeek[day]][1].split(":")[1]));
+
+          if (to <= today) return res.json(slots);
+          if (since <= today && to >= today) {
+            since.setHours(today.getHours() + 1);
+          }
+
+          var timeframe =
+            to.getHours() -
+            since.getHours() +
+            (to.getMinutes() - since.getMinutes()) / 60;
+          var quantity = parseInt(timeframe / sess_dur);
+
+          //Freebusy query
+          client.setCredentials({
+            refresh_token: docs[0].refresh_token,
+          });
+          // Create a new calender instance.
+          const calendar = google.calendar({
+            version: "v3",
+            auth: client,
+          });
+
+          if (docs[0][dayOfWeek[day]][0] != 0) {
+            await calendar.freebusy.query(
+              {
+                resource: {
+                  timeMin: since,
+                  timeMax: to,
+                  items: [{ id: "primary" }],
+                },
+              },
+              (err, res) => {
+                // Check for errors in our query and log them if they exist.
+                if (err) return console.error("Free Busy Query Error: ", err);
+
+                // Create an array of all events on our calendar during that time.
+                const events = res.data.calendars.primary.busy;
+                // console.log(events);
+                var first = new Date(since);
+                // ("0" + since.getHours()).slice(-2) +
+                // ":" +
+                // ("0" + since.getMinutes()).slice(-2);
+
+                for (var i = 0; i < quantity; i++) {
+                  var last = new Date(first);
+                  last.setHours(
+                    last.getHours() + parseInt(docs[0].sess.split(":")[0])
+                  );
+                  last.setMinutes(
+                    last.getMinutes() + parseInt(docs[0].sess.split(":")[1]) - 1
+                  );
+
+                  var ok = true;
+                  for (var j = 0; j < events.length; j++) {
+                    if (
+                      new Date(events[j].start) <= last &&
+                      new Date(events[j].end) >= first
+                    ) {
+                      ok = false;
+                      break;
+                    }
+                  }
+                  // console.log(ok);
+                  if (ok) {
+                    slots.push([
+                      ("0" + first.getHours()).slice(-2) +
+                        ":" +
+                        ("0" + first.getMinutes()).slice(-2),
+                      ("0" + last.getHours()).slice(-2) +
+                        ":" +
+                        ("0" + last.getMinutes()).slice(-2),
+                    ]);
+                  }
+
+                  first = new Date(last);
+                  first.setMinutes(first.getMinutes() + 1);
+                }
+                cb(slots);
+              }
+            );
+            // console.log(events);
+          } else {
+            cb(slots);
+          }
+        }
+      });
+  });
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -156,4 +288,5 @@ module.exports = {
   googleCall,
   googleCallBack,
   googleRemove,
+  slots,
 };

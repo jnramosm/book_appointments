@@ -17,6 +17,9 @@ export default class CustomLayout extends React.Component {
             <Menu.Item key="1">
               <Link to="/">Settings</Link>
             </Menu.Item>
+            <Menu.Item key="5">
+              <Link to="/appointments">Book Appointment</Link>
+            </Menu.Item>
             <Menu.Item key="2">
               <Link to="/login">Log in</Link>
             </Menu.Item>

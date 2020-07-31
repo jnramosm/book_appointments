@@ -45,6 +45,12 @@ const googleRemove = (req, res, next) => {
   settings.googleRemove(req.body.email, (message) => res.json({ message }));
 };
 
+const slots = (req, res, next) => {
+  settings.slots(req.body, utils.oauth2Client, utils.google, (slotsArray) =>
+    res.json(slotsArray)
+  );
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -53,4 +59,5 @@ module.exports = {
   googleCall,
   googleCallBack,
   googleRemove,
+  slots,
 };
