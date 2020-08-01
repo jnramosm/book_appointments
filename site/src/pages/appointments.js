@@ -4,7 +4,7 @@ import Card from "../components/card";
 import "./styles.css";
 import moment from "moment";
 import { email } from "../private/email";
-import { slots } from "../utils/api";
+import { slots, createEvent } from "../utils/api";
 
 export default class Appointments extends React.Component {
   constructor(props) {
@@ -17,6 +17,7 @@ export default class Appointments extends React.Component {
       date: new Date(),
       name: "",
       email: "",
+      loading_modal: false,
     };
     this.handleCalendarSelect = this.handleCalendarSelect.bind(this);
     this.handleCards = this.handleCards.bind(this);
@@ -60,20 +61,17 @@ export default class Appointments extends React.Component {
   }
 
   async handleOk() {
-    console.log(this.state.selected);
+    this.setState({ loading_modal: true });
     try {
-      let r = await fetch("http://localhost:8888/api/createevent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          date: this.state.date,
-          slot: this.state.selected,
-          name: this.state.name,
-          email: this.state.email,
-        }),
+      let d = await createEvent({
+        date: this.state.date,
+        slot: this.state.selected,
+        name: this.state.name,
+        email_customer: this.state.email,
+        email_doctor: email,
       });
-      let d = await r.json();
-      if (d.msg === "done") this.setState({ modal: false });
+      if (d.msg === "Success") this.setState({ modal: false });
+      this.setState({ loading_modal: false });
       //console.log(d);
     } catch (e) {
       console.log(e);
@@ -133,30 +131,34 @@ export default class Appointments extends React.Component {
           onOk={this.handleOk}
           onCancel={() => this.setState({ modal: false })}
         >
-          <Form labelCol={{ span: 4 }} wrapperCol={{ span: 12 }}>
-            <Form.Item
-              label="Name"
-              rules={[{ required: true, message: "Introduce your name!" }]}
-            >
-              <Input
-                type="text"
-                id="name"
-                value={this.state.name}
-                onChange={this.handleInputChange}
-              />
-            </Form.Item>
-            <Form.Item
-              label="E-mail"
-              rules={[{ required: true, message: "Introduce your email!" }]}
-            >
-              <Input
-                type="email"
-                id="email"
-                value={this.state.email}
-                onChange={this.handleInputChange}
-              />
-            </Form.Item>
-          </Form>
+          {this.state.loading_modal ? (
+            <Spin size="large" tip="Loading..." />
+          ) : (
+            <Form labelCol={{ span: 4 }} wrapperCol={{ span: 12 }}>
+              <Form.Item
+                label="Name"
+                rules={[{ required: true, message: "Introduce your name!" }]}
+              >
+                <Input
+                  type="text"
+                  id="name"
+                  value={this.state.name}
+                  onChange={this.handleInputChange}
+                />
+              </Form.Item>
+              <Form.Item
+                label="E-mail"
+                rules={[{ required: true, message: "Introduce your email!" }]}
+              >
+                <Input
+                  type="email"
+                  id="email"
+                  value={this.state.email}
+                  onChange={this.handleInputChange}
+                />
+              </Form.Item>
+            </Form>
+          )}
         </Modal>
       </>
     );

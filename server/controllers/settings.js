@@ -51,6 +51,12 @@ const slots = (req, res, next) => {
   );
 };
 
+const createEvent = (req, res, next) => {
+  settings.createEvent(req.body, utils.oauth2Client, utils.google, (message) =>
+    res.json({ message })
+  );
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -60,4 +66,5 @@ module.exports = {
   googleCallBack,
   googleRemove,
   slots,
+  createEvent,
 };

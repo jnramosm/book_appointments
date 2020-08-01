@@ -24,6 +24,10 @@ export const slots = async (obj) => {
   return await requestApi("/slots", "POST", obj);
 };
 
+export const createEvent = async (obj) => {
+  return await requestApi("/createevent", "POST", obj);
+};
+
 const requestApi = async (
   path = "",
   method = "GET",

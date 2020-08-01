@@ -19,6 +19,8 @@ const routes = (app) => {
   app.post("/google/remove", settings.googleRemove);
 
   app.post("/slots", settings.slots);
+
+  app.post("/createevent", settings.createEvent);
 };
 
 module.exports = {

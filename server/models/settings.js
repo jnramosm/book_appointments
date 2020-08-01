@@ -280,6 +280,91 @@ const slots = async (data = {}, client, google, cb) => {
   });
 };
 
+const createEvent = (data = {}, client, google, cb) => {
+  connection(async (db) => {
+    await client.on("tokens", (tokens) => {
+      if (tokens.refresh_token) {
+        db.collection("users").updateOne(
+          { email: data.email_doctor },
+          {
+            $set: {
+              refresh_token: tokens.refresh_token,
+            },
+          },
+          {
+            upsert: true,
+          },
+          (err, docs) => {
+            if (err) console.log(err);
+          }
+        );
+      }
+    });
+    var name = data.name;
+    var email = data.email_customer;
+    var date = data.date;
+    var slot = data.slot;
+    var start = new Date(date);
+    start.setHours(parseInt(slot.split("/")[0].split(":")[0]));
+    start.setMinutes(parseInt(slot.split("/")[0].split(":")[1]));
+    var end = new Date(date);
+    end.setHours(parseInt(slot.split("/")[1].split(":")[0]));
+    end.setMinutes(parseInt(slot.split("/")[1].split(":")[1]) + 1);
+
+    db.collection("users")
+      .find({ email: data.email_doctor })
+      .toArray()
+      .then(async (docs) => {
+        await client.setCredentials({
+          refresh_token: docs[0].refresh_token,
+        });
+        // Create a new calender instance.
+        const calendar = google.calendar({
+          version: "v3",
+          auth: client,
+        });
+        var event = {
+          summary: "Appointment",
+          description:
+            "Hello " +
+            name +
+            ":\nYour appointment has been scheduled. See you soon!",
+          start: {
+            dateTime: start,
+          },
+          end: {
+            dateTime: end,
+          },
+          attendees: [{ email: data.email_doctor }, { email }],
+          reminders: {
+            useDefault: false,
+            overrides: [
+              { method: "email", minutes: 24 * 60 },
+              { method: "popup", minutes: 10 },
+            ],
+          },
+        };
+        calendar.events.insert(
+          {
+            auth: client,
+            calendarId: "primary",
+            resource: event,
+            sendUpdates: "all",
+          },
+          function (err, event) {
+            if (err) {
+              console.log(
+                "There was an error contacting the Calendar service: " + err
+              );
+              cb("Error: " + err);
+            }
+            cb("Success");
+          }
+        );
+      });
+  });
+};
+
 module.exports = {
   getSettings,
   setSettings,
@@ -289,4 +374,5 @@ module.exports = {
   googleCallBack,
   googleRemove,
   slots,
+  createEvent,
 };
